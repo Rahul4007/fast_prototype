@@ -1,10 +1,11 @@
-/***********************************************************************************
- * @file SPIDriver.c
+/************************************************************************************
+ *        @file: spi_driver.c
+ *
  * \b Processor: MSP430FR2033
  *
- * \b Complier: TI V18.1.3 LTS
+ * \b  Complier: TI V18.1.3 LTS
  *
- * \b Company: Apollo Fire Detectors Ltd (c) 2016
+ * \b    Author: R. Sharma 
  *
  ************************************************************************************
  * <b> File Description: </b>
@@ -12,28 +13,26 @@
  * <table>
  * <tr><th> Parameter <th> Descriptions
  * <tr><td> Author <td> R. Sharma
- * <tr><td> Dependencies <td> Dependencies on SPIDriver header, Hardware header
+ * <tr><td> Dependencies <td> Dependencies on SPI Driver header, Hardware header
  * </table>
  ************************************************************************************/
 /******************************************************************************
- 1. Within HardwareProfile_xxxxx.h, add the following #defines:-
+ 1. Within spi_driver.h, add the following #defines:-
  1.1 bit masks for:
  -SPI_STE
- -SPI_SIMO
- -SPI_SOMI
+ -SPI_MOSI
+ -SPI_MISO
  -SPI_CLK
 
  1.2 Also define the Function Select register for the eUSCI-SPI peripheral as
- #define  SPI_PORT_SEL0     PxSEL0      // and PxSEL1 if needed
 
 
- *****************************************************************************/
+ ************************************************************************************/
 #include <stdint.h>
 #include <stdlib.h>
 
 /* L O C A L   I N C L U D E S ***********************************************/
 //clang-format off
-#include "hardware_profile.h"
 #include "spi_driver.h"
 //clang-format on
 
@@ -68,7 +67,7 @@
 void SPI_MasterSetup(void)
 {
     /* enable the primary SPI functions on the I/O pins */
-    SPI_PORT_SEL0 |= SPI_MOSI + SPI_MISO + SPI_SCK;
+    P5SEL0 |= SPI_MOSI + SPI_MISO + SPI_STE;
     /* Initialize USCI state machine*********************/
     UCB0CTLW0 |= UCSWRST;
     /* 3-pin, 8-bit SPI master***************************/
@@ -104,7 +103,7 @@ void SPI_MasterSetup(void)
  ******************************************************************************/
 void SPI_SlaveSetup(void)
 {
-    SPI_PORT_SEL0 |= SPI_SCK + SPI_MOSI + SPI_MISO;
+    P5SEL0 |= SPI_STE + SPI_MOSI + SPI_MISO;
     /* Put state machine in reset */
     UCB0CTLW0 = UCSWRST;
     /* 3-pin, 8-bit SPI slave */
@@ -161,7 +160,7 @@ void TransmitSPIbyte(const uint8_t Value)
  ******************************************************************************/
 uint8_t ReceiveSPIbyte(void)
 {
-    uint8_t Value = 0;
+    uint8_t Value = 0U;
     /* Update Variable with UCB0RXBUFF */
     Value = UCB0RXBUF;
 
